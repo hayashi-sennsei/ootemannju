@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>10のごうせい「おおてまんじゅう」</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts for Friendly Rounded Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: #fdf8f2;
+            color: #4a3b32;
+            touch-action: manipulation;
+        }
+
+        /* Animated background pattern */
+        .bg-pattern {
+            background-image: radial-gradient(#e0c3fc 1px, transparent 1px), radial-gradient(#ffdfba 1px, #fdf8f2 1px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+
+        /* Bouncing effect for cards and elements */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(251, 146, 60, 0.4)); }
+            50% { transform: scale(1.02); filter: drop-shadow(0 0 14px rgba(251, 146, 60, 0.8)); }
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        /* Strict 5 Columns x 2 Rows 10-Frame Grid Styling */
+        .ten-frame {
+            display: grid !important;
+            grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+            grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+            gap: 6px;
+        }
+
+        @media (min-width: 640px) {
+            .ten-frame {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-pattern h-screen max-h-screen flex flex-col items-center p-2 sm:p-3 overflow-hidden select-none">
+
+    <header class="w-full max-w-3xl flex justify-between items-center gap-2 bg-white/90 backdrop-blur-md p-2.5 px-4 rounded-2xl shadow-md border border-amber-200 shrink-0">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 bg-amber-600 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-sm">
+                10
+            </div>
+            <div>
+                <h1 class="text-base sm:text-xl font-black text-amber-900 tracking-wide leading-tight">
+                    10のごうせい フラッシュカード
+                </h1>
+                <p class="text-[10px] sm:text-xs font-bold text-amber-700 leading-none">「〜と〜で おおてまんじゅう」</p>
+            </div>
+        </div>
+
+        <!-- Audio and Settings Control -->
+        <div class="flex items-center gap-1.5">
+            <button id="btn-sound" onclick="toggleSound()" class="p-2 px-3 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 text-xs sm:text-sm">
+                <i id="icon-sound" class="fa-solid fa-volume-high"></i>
+                <span class="hidden sm:inline">おと ON</span>
+            </button>
+            <button id="btn-voice" onclick="toggleVoice()" class="p-2 px-3 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-2xl font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 text-xs sm:text-sm">
+                <i id="icon-voice" class="fa-solid fa-comment-dots"></i>
+                <span class="hidden sm:inline">よみあげ ON</span>
+            </button>
+        </div>
+    </header>
+
+    <nav class="w-full max-w-3xl my-2 flex justify-center gap-1.5 sm:gap-3 shrink-0">
+        <button onclick="setMode('order')" id="mode-order" class="mode-btn px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl font-black text-xs sm:text-sm transition-all shadow-sm flex items-center gap-1.5 bg-amber-500 text-white border-b-2 border-amber-700 active:translate-y-0.5">
+            <i class="fa-solid fa-arrow-down-1-9"></i> じゅんばん
+        </button>
+        <button onclick="setMode('auto')" id="mode-auto" class="mode-btn px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl font-black text-xs sm:text-sm transition-all shadow-sm flex items-center gap-1.5 bg-white text-amber-800 border border-amber-300 hover:bg-amber-50 active:translate-y-0.5">
+            <i class="fa-solid fa-play"></i> じどう
+        </button>
+        <button onclick="setMode('select')" id="mode-select" class="mode-btn px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl font-black text-xs sm:text-sm transition-all shadow-sm flex items-center gap-1.5 bg-white text-amber-800 border border-amber-300 hover:bg-amber-50 active:translate-y-0.5">
+            <i class="fa-solid fa-grid-2"></i> えらぶ
+        </button>
+        <button onclick="setMode('quiz')" id="mode-quiz" class="mode-btn px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl font-black text-xs sm:text-sm transition-all shadow-sm flex items-center gap-1.5 bg-white text-amber-800 border border-amber-300 hover:bg-amber-50 active:translate-y-0.5">
+            <i class="fa-solid fa-circle-question"></i> クイズ
+        </button>
+    </nav>
+
+    <main class="w-full max-w-3xl flex-1 flex flex-col items-center justify-start min-h-0 overflow-y-auto">
+        <!-- ズレ防止のため flex-col と gap-2 で固定し、justify-between は使わない -->
+        <div id="view-card" class="w-full flex flex-col items-center gap-2 pb-2">
+            
+            <!-- Auto Mode Control Bar (固定高さ) -->
+            <div id="auto-status-bar" class="hidden flex items-center justify-center gap-3 w-full shrink-0 h-10 sm:h-12">
+                <button id="btn-auto-toggle" onclick="toggleAutoPlay()" class="px-5 sm:px-6 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-black text-sm sm:text-base shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 w-40 sm:w-48">
+                    <i id="icon-auto-toggle" class="fa-solid fa-pause"></i>
+                    <span id="text-auto-toggle">とめる</span>
+                </button>
+            </div>
+
+            <!-- Phrase Display Board (固定高さとFlexboxレイアウトでズレ防止) -->
+            <div class="w-full h-24 sm:h-28 bg-amber-900 text-amber-50 rounded-2xl p-2 shadow-md border-2 border-amber-700 flex flex-col justify-center items-center relative overflow-hidden shrink-0">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-7xl font-black text-white pointer-events-none">10</div>
+                <!-- テキストが改行しても高さが変わらないようにコンテナの高さを固定 -->
+                <div id="phrase-text" class="flex flex-col items-center justify-center w-full h-full gap-1 min-h-[4rem]">
+                    <!-- Dynamic Text insert -->
+                </div>
+            </div>
+
+            <div class="w-full bg-white rounded-2xl p-3 shadow-md border-2 border-amber-200 flex flex-col justify-center items-center shrink-0">
+                <!-- 10 Frame Box (Strict 5 Columns x 2 Rows Container) -->
+                <div id="ten-frame-container" class="ten-frame max-w-md w-full mx-auto p-2 bg-amber-50/80 rounded-xl border-2 border-amber-300 shadow-inner">
+                    <!-- 10 slots inserted directly by JS -->
+                </div>
+
+                <!-- Equation Display (固定高さと幅) -->
+                <div class="mt-3 flex justify-center items-center gap-3 sm:gap-4 text-2xl sm:text-3xl md:text-4xl font-black text-amber-900 shrink-0 h-12 sm:h-14 w-full max-w-sm">
+                    <span id="num-a" class="w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center bg-rose-100 border border-rose-300 text-rose-700 rounded-xl transition-all">?</span>
+                    <span class="text-amber-400 w-6 text-center">＋</span>
+                    <span id="num-b" class="w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center bg-indigo-100 border border-indigo-300 text-indigo-700 rounded-xl transition-all">?</span>
+                    <span class="text-amber-400 w-6 text-center">＝</span>
+                    <span id="num-total" class="w-16 sm:w-20 h-12 sm:h-14 flex items-center justify-center bg-amber-500 text-white rounded-xl shadow-sm transition-all opacity-50">10</span>
+                </div>
+            </div>
+
+            <!-- Card Controller Buttons (固定幅でズレ防止) -->
+            <div class="flex justify-center items-center gap-2 sm:gap-4 w-full shrink-0 h-14 sm:h-16 mt-1">
+                <button onclick="prevCard()" class="w-20 sm:w-28 h-10 sm:h-12 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-xl font-black text-xs sm:text-base shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-chevron-left"></i> まえ
+                </button>
+
+                <button id="btn-next-step" onclick="nextStep()" class="w-36 sm:w-48 h-12 sm:h-14 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl font-black text-sm sm:text-xl shadow-md transition-all transform active:scale-95 pulse-glow flex justify-center items-center gap-2 shrink-0">
+                    <span id="step-btn-text">つぎへ</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <button onclick="nextCard()" class="w-20 sm:w-28 h-10 sm:h-12 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-xl font-black text-xs sm:text-base shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 shrink-0">
+                    つぎ <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-center h-8 shrink-0">
+                <button onclick="replayCurrentCard()" class="px-4 h-full bg-white hover:bg-amber-100 border border-amber-300 rounded-lg shadow-2xs transition-all flex items-center gap-1 text-xs font-bold text-amber-700">
+                    <i class="fa-solid fa-rotate-right"></i> もういちど みる
+                </button>
+            </div>
+        </div>
+
+        <div id="view-select" class="w-full hidden bg-white rounded-2xl p-4 shadow-md border-2 border-amber-200 text-center overflow-y-auto max-h-[70vh]">
+            <h2 class="text-xl font-black text-amber-900 mb-4">えらんで れんしゅう しよう！</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto">
+                <script>
+                    for(let i=1; i<=9; i++) {
+                        document.write(`
+                            <button onclick="selectSpecificCard(${i})" class="p-3 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-xl shadow-2xs flex items-center justify-between transition-all hover:scale-102 active:scale-95">
+                                <span class="text-xl font-black text-amber-900">${i} と ${10-i}</span>
+                                <span class="text-[10px] font-bold text-amber-700 bg-amber-200 px-2 py-0.5 rounded-md">おおてまんじゅう</span>
+                            </button>
+                        `);
+                    }
+                </script>
+            </div>
+        </div>
+
+        <div id="view-quiz" class="w-full hidden flex flex-col items-center gap-2 pb-2">
+            <div class="w-full h-24 bg-amber-900 text-amber-50 rounded-2xl p-2 shadow-md border-2 border-amber-700 flex flex-col justify-center items-center shrink-0">
+                <p class="text-sm sm:text-base font-bold text-amber-200 mb-1">あと いくつで 10（おおてまんじゅう）？</p>
+                <div class="text-2xl sm:text-4xl font-black flex justify-center items-center gap-3 my-1">
+                    <span id="quiz-num-a" class="text-rose-300 w-10 text-center">1</span>
+                    <span>と</span>
+                    <span id="quiz-num-b-mask" class="w-12 h-12 bg-amber-800 border-2 border-dashed border-amber-400 rounded-xl flex items-center justify-center text-amber-300 animate-pulse">?</span>
+                    <span>で 10！</span>
+                </div>
+            </div>
+
+            <!-- Quiz 10 Frame preview -->
+            <div class="w-full bg-white rounded-2xl p-3 shadow-md border-2 border-amber-200 shrink-0">
+                <div id="quiz-ten-frame" class="ten-frame max-w-md w-full mx-auto p-2 bg-amber-50/80 rounded-xl border-2 border-amber-300">
+                    <!-- JS renders frame -->
+                </div>
+            </div>
+
+            <!-- Choice Buttons -->
+            <div id="quiz-options" class="flex flex-wrap justify-center gap-2 max-w-xl w-full shrink-0">
+                <!-- 1 to 9 options generated by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-3xl text-center py-2 text-[10px] sm:text-xs font-bold text-amber-800/80 flex justify-between items-center border-t border-amber-200/60 shrink-0 mt-auto">
+        <div>10のごうせい にゅうもん（おおてまんじゅう）</div>
+        <span class="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full font-black text-[10px]">おかやま めいか</span>
+    </footer>
+
+    <script>
+        /* --- SVG Otemanjou Graphic Definition --- */
+        const OTEMANJOU_A_SVG = `
+            <svg viewBox="0 0 100 100" class="w-full h-full animate-pop filter drop-shadow-xs overflow-hidden">
+                <path d="M 10,75 C 10,35 25,15 50,15 C 75,15 90,35 90,75 C 90,85 80,88 50,88 C 20,88 10,85 10,75 Z" fill="#7c3a21"/>
+                <path d="M 15,70 C 18,40 30,22 50,22 C 70,22 82,40 85,70 C 75,76 60,78 50,78 C 35,78 20,75 15,70 Z" fill="#d97706" opacity="0.3"/>
+                <ellipse cx="40" cy="32" rx="12" ry="6" fill="#ffffff" opacity="0.3" transform="rotate(-15 40 32)"/>
+                <rect x="25" y="84" width="50" height="6" rx="2" fill="#fef3c7"/>
+            </svg>
+        `;
+
+        const OTEMANJOU_B_SVG = `
+            <svg viewBox="0 0 100 100" class="w-full h-full animate-pop filter drop-shadow-xs overflow-hidden">
+                <path d="M 10,75 C 10,35 25,15 50,15 C 75,15 90,35 90,75 C 90,85 80,88 50,88 C 20,88 10,85 10,75 Z" fill="#881337"/>
+                <path d="M 15,70 C 18,40 30,22 50,22 C 70,22 82,40 85,70 C 75,76 60,78 50,78 C 35,78 20,75 15,70 Z" fill="#f59e0b" opacity="0.3"/>
+                <ellipse cx="40" cy="32" rx="12" ry="6" fill="#ffffff" opacity="0.35" transform="rotate(-15 40 32)"/>
+                <rect x="25" y="84" width="50" height="6" rx="2" fill="#fef3c7"/>
+            </svg>
+        `;
+
+        let currentNumA = 1; 
+        let currentStep = 1; 
+        let activeMode = 'order'; 
+        let soundEnabled = true;
+        let voiceEnabled = true;
+        let autoPlayTimer = null;
+        let isAutoPlaying = false;
+
+        const numberSpeechMap = {
+            1: "いち", 2: "に", 3: "さん", 4: "よん", 5: "ご",
+            6: "ろく", 7: "なな", 8: "はち", 9: "きゅう", 10: "じゅう"
+        };
+
+        let synth = null;
+
+        function initAudio() {
+            if (!synth && typeof Tone !== 'undefined') {
+                synth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.3 }
+                }).toDestination();
+                synth.volume.value = -6;
+            }
+        }
+
+        function playPopSound(pitch = "C5") {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                synth.triggerAttackRelease(pitch, "8n");
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function playSuccessFanfare() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const now = Tone.now();
+                synth.triggerAttackRelease("C5", "8n", now);
+                synth.triggerAttackRelease("E5", "8n", now + 0.1);
+                synth.triggerAttackRelease("G5", "8n", now + 0.2);
+                synth.triggerAttackRelease("C6", "4n", now + 0.3);
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function speakText(text) {
+            if (!voiceEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ja-JP';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('btn-sound');
+            const icon = document.getElementById('icon-sound');
+            if (soundEnabled) {
+                btn.classList.replace('bg-gray-200', 'bg-amber-100');
+                btn.classList.replace('text-gray-600', 'text-amber-800');
+                icon.className = 'fa-solid fa-volume-high';
+                playPopSound('G5');
+            } else {
+                btn.classList.replace('bg-amber-100', 'bg-gray-200');
+                btn.classList.replace('text-amber-800', 'text-gray-600');
+                icon.className = 'fa-solid fa-volume-xmark';
+            }
+        }
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            const btn = document.getElementById('btn-voice');
+            const icon = document.getElementById('icon-voice');
+            if (voiceEnabled) {
+                btn.classList.replace('bg-gray-200', 'bg-amber-100');
+                btn.classList.replace('text-gray-600', 'text-amber-800');
+                icon.className = 'fa-solid fa-comment-dots';
+                speakText("よみあげ オン");
+            } else {
+                btn.classList.replace('bg-amber-100', 'bg-gray-200');
+                btn.classList.replace('text-amber-800', 'text-gray-600');
+                icon.className = 'fa-solid fa-comment-slash';
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function initTenFrameContainer() {
+            const container = document.getElementById('ten-frame-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'w-full aspect-square bg-white rounded-xl border border-dashed border-amber-300 flex items-center justify-center p-1 shadow-2xs transition-all duration-300 overflow-hidden';
+                slot.id = `frame-slot-${i}`;
+                container.appendChild(slot);
+            }
+        }
+
+        function renderCard() {
+            const numB = 10 - currentNumA;
+            const phraseText = document.getElementById('phrase-text');
+            const numAEl = document.getElementById('num-a');
+            const numBEl = document.getElementById('num-b');
+            const numTotalEl = document.getElementById('num-total');
+            const btnStepText = document.getElementById('step-btn-text');
+
+            for (let i = 0; i < 10; i++) {
+                const slot = document.getElementById(`frame-slot-${i}`);
+                slot.innerHTML = '';
+                slot.className = 'w-full aspect-square bg-white rounded-xl border border-dashed border-amber-300 flex items-center justify-center p-1 shadow-2xs transition-all duration-300 overflow-hidden';
+            }
+
+            if (currentStep === 1) {
+                // 2行に分けてレイアウトを固定し、ガタガタ動くのを防ぐ
+                phraseText.innerHTML = `
+                    <div class="flex items-center justify-center gap-2 h-10 w-full shrink-0">
+                        <span class="text-rose-400 font-black text-2xl sm:text-4xl animate-pop w-12 text-center inline-block">${currentNumA}</span>
+                        <span class="text-amber-200 font-bold text-xl sm:text-2xl w-8 text-center">と</span>
+                        <span class="text-amber-400 opacity-40 font-black text-2xl sm:text-4xl w-12 text-center inline-block">？</span>
+                        <span class="text-amber-200 font-bold text-xl sm:text-2xl w-8 text-center">で</span>
+                    </div>
+                    <div class="h-10 flex items-center justify-center w-full shrink-0">
+                        <span class="text-amber-400 opacity-0 text-xl sm:text-3xl font-black text-center tracking-widest">おおてまんじゅう</span>
+                    </div>
+                `;
+
+                numAEl.innerText = currentNumA;
+                numAEl.className = 'w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center bg-rose-500 text-white font-black border border-rose-600 rounded-xl shadow-xs scale-105 animate-pop';
+                
+                numBEl.innerText = '?';
+                numBEl.className = 'w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center bg-indigo-50 border border-indigo-200 text-indigo-300 rounded-xl';
+
+                numTotalEl.className = 'w-16 sm:w-20 h-12 sm:h-14 flex items-center justify-center bg-amber-200 text-amber-500 rounded-xl opacity-40';
+
+                for (let i = 0; i < currentNumA; i++) {
+                    const slot = document.getElementById(`frame-slot-${i}`);
+                    slot.innerHTML = OTEMANJOU_A_SVG;
+                    slot.classList.add('bg-rose-50/80', 'border-rose-300');
+                }
+
+                btnStepText.innerText = "のこりは？";
+                playPopSound("E5");
+                speakText(`${numberSpeechMap[currentNumA]}`);
+            }
+            else if (currentStep === 2) {
+                phraseText.innerHTML = `
+                    <div class="flex items-center justify-center gap-2 h-10 w-full shrink-0">
+                        <span class="text-rose-400 font-black text-2xl sm:text-4xl w-12 text-center inline-block">${currentNumA}</span>
+                        <span class="text-amber-200 font-bold text-xl sm:text-2xl w-8 text-center">と</span>
+                        <span class="text-indigo-300 font-black text-2xl sm:text-4xl animate-pop w-12 text-center inline-block">${numB}</span>
+                        <span class="text-amber-200 font-bold text-xl sm:text-2xl w-8 text-center">で</span>
+                    </div>
+                    <div class="h-10 flex items-center justify-center w-full shrink-0">
+                        <span class="text-amber-400 opacity-0 text-xl sm:text-3xl font-black text-center tracking-widest">おおてまんじゅう</span>
+                    </div>
+                `;
+
+                numAEl.innerText = currentNumA;
+                numAEl.className = 'w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center bg-rose-500 text-white font-black border border-rose-600 rounded-xl';
+
+                numBEl.innerText = numB;
+                numBEl.className = 'w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center bg-indigo-500 text-white font-black border border-indigo-600 rounded-xl shadow-xs scale-105 animate-pop';
+
+                numTotalEl.className = 'w-16 sm:w-20 h-12 sm:h-14 flex items-center justify-center bg-amber-200 text-amber-600 rounded-xl opacity-60';
+
+                for (let i = 0; i < currentNumA; i++) {
+                    const slot = document.getElementById(`frame-slot-${i}`);
+                    slot.innerHTML = OTEMANJOU_A_SVG;
+                    slot.classList.add('bg-rose-50/80', 'border-rose-300');
+                }
+
+                for (let i = currentNumA; i < 10; i++) {
+                    const slot = document.getElementById(`frame-slot-${i}`);
+                    slot.innerHTML = OTEMANJOU_B_SVG;
+                    slot.classList.add('bg-indigo-50/80', 'border-indigo-300');
+                }
+
+                btnStepText.innerText = "がったい！";
+                playPopSound("G5");
+                speakText(`${numberSpeechMap[currentNumA]} と ${numberSpeechMap[numB]}`);
+            }
+            else if (currentStep === 3) {
+                phraseText.innerHTML = `
+                    <div class="flex items-center justify-center gap-2 h-10 w-full shrink-0">
+                        <span class="text-rose-300 font-black text-2xl sm:text-4xl w-12 text-center inline-block">${currentNumA}</span>
+                        <span class="text-amber-200 font-bold text-xl sm:text-2xl w-8 text-center">と</span>
+                        <span class="text-indigo-300 font-black text-2xl sm:text-4xl w-12 text-center inline-block">${numB}</span>
+                        <span class="text-amber-200 font-bold text-xl sm:text-2xl w-8 text-center">で</span>
+                    </div>
+                    <div class="h-10 flex items-center justify-center w-full shrink-0">
+                        <span class="text-amber-300 font-black text-xl sm:text-3xl animate-pop underline decoration-amber-400 text-center tracking-widest">おおてまんじゅう！</span>
+                    </div>
+                `;
+
+                numAEl.innerText = currentNumA;
+                numAEl.className = 'w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center bg-rose-500 text-white font-black border border-rose-600 rounded-xl';
+
+                numBEl.innerText = numB;
+                numBEl.className = 'w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center bg-indigo-500 text-white font-black border border-indigo-600 rounded-xl';
+
+                numTotalEl.innerText = '10';
+                numTotalEl.className = 'w-16 sm:w-20 h-12 sm:h-14 flex items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500 text-white font-black text-xl sm:text-3xl rounded-xl shadow-md scale-105 animate-pop border border-amber-300';
+
+                for (let i = 0; i < 10; i++) {
+                    const slot = document.getElementById(`frame-slot-${i}`);
+                    if (i < currentNumA) {
+                        slot.innerHTML = OTEMANJOU_A_SVG;
+                        slot.classList.add('bg-rose-100/90', 'border-rose-400');
+                    } else {
+                        slot.innerHTML = OTEMANJOU_B_SVG;
+                        slot.classList.add('bg-indigo-100/90', 'border-indigo-400');
+                    }
+                }
+
+                btnStepText.innerText = "つぎのカード";
+                playSuccessFanfare();
+                speakText(`${numberSpeechMap[currentNumA]} と ${numberSpeechMap[numB]} で おおてまんじゅう！`);
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < 3) {
+                currentStep++;
+            } else {
+                nextCard();
+                return;
+            }
+            renderCard();
+        }
+
+        function nextCard() {
+            currentStep = 1;
+            if (currentNumA < 9) {
+                currentNumA++;
+            } else {
+                currentNumA = 1;
+            }
+            renderCard();
+        }
+
+        function prevCard() {
+            currentStep = 1;
+            if (currentNumA > 1) {
+                currentNumA--;
+            } else {
+                currentNumA = 9;
+            }
+            renderCard();
+        }
+
+        function replayCurrentCard() {
+            currentStep = 1;
+            renderCard();
+        }
+
+        function selectSpecificCard(num) {
+            currentNumA = num;
+            currentStep = 1;
+            setMode('order');
+            renderCard();
+        }
+
+        function setMode(mode) {
+            activeMode = mode;
+            clearTimeout(autoPlayTimer);
+            isAutoPlaying = false;
+
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.className = 'mode-btn px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl font-black text-xs sm:text-sm transition-all shadow-sm flex items-center gap-1.5 bg-white text-amber-800 border border-amber-300 hover:bg-amber-50 active:translate-y-0.5';
+            });
+
+            const activeBtn = document.getElementById(`mode-${mode}`);
+            if (activeBtn) {
+                activeBtn.className = 'mode-btn px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl font-black text-xs sm:text-sm transition-all shadow-sm flex items-center gap-1.5 bg-amber-500 text-white border-b-2 border-amber-700 active:translate-y-0.5';
+            }
+
+            const cardView = document.getElementById('view-card');
+            const selectView = document.getElementById('view-select');
+            const quizView = document.getElementById('view-quiz');
+            const autoStatusBar = document.getElementById('auto-status-bar');
+
+            cardView.classList.add('hidden');
+            selectView.classList.add('hidden');
+            quizView.classList.add('hidden');
+            autoStatusBar.classList.add('hidden');
+
+            if (mode === 'order' || mode === 'auto') {
+                cardView.classList.remove('hidden');
+                if (mode === 'auto') {
+                    autoStatusBar.classList.remove('hidden');
+                    startAutoPlay();
+                }
+            } else if (mode === 'select') {
+                selectView.classList.remove('hidden');
+            } else if (mode === 'quiz') {
+                quizView.classList.remove('hidden');
+                startQuizQuestion();
+            }
+        }
+
+        function startAutoPlay() {
+            isAutoPlaying = true;
+            updateAutoButtonUI();
+            currentStep = 1;
+            renderCard();
+            clearTimeout(autoPlayTimer);
+            scheduleNextAutoStep();
+        }
+
+        function scheduleNextAutoStep() {
+            if (!isAutoPlaying) return;
+
+            // ご要望通り、通常の切り替えは1.5秒(1500)、完成から次への移行は2秒(2000)に固定しました
+            let delay = (currentStep === 3) ? 2000 : 1500;
+
+            autoPlayTimer = setTimeout(() => {
+                if (!isAutoPlaying) return;
+
+                if (currentStep < 3) {
+                    currentStep++;
+                } else {
+                    currentStep = 1;
+                    currentNumA = currentNumA < 9 ? currentNumA + 1 : 1;
+                }
+                renderCard();
+                scheduleNextAutoStep();
+            }, delay);
+        }
+
+        function toggleAutoPlay() {
+            if (isAutoPlaying) {
+                isAutoPlaying = false;
+                clearTimeout(autoPlayTimer);
+                updateAutoButtonUI();
+                speakText("とめました");
+            } else {
+                startAutoPlay();
+                speakText("すたーと します");
+            }
+        }
+
+        function updateAutoButtonUI() {
+            const btnToggle = document.getElementById('btn-auto-toggle');
+            const iconToggle = document.getElementById('icon-auto-toggle');
+            const textToggle = document.getElementById('text-auto-toggle');
+
+            if (isAutoPlaying) {
+                btnToggle.className = 'px-5 sm:px-6 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-black text-sm sm:text-base shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 w-40 sm:w-48';
+                iconToggle.className = 'fa-solid fa-pause';
+                textToggle.innerText = 'とめる';
+            } else {
+                btnToggle.className = 'px-5 sm:px-6 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-sm sm:text-base shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 w-40 sm:w-48';
+                iconToggle.className = 'fa-solid fa-play';
+                textToggle.innerText = 'すたーと';
+            }
+        }
+
+        let quizTargetA = 1;
+        let quizTargetB = 9;
+
+        function startQuizQuestion() {
+            quizTargetA = Math.floor(Math.random() * 9) + 1;
+            quizTargetB = 10 - quizTargetA;
+
+            document.getElementById('quiz-num-a').innerText = quizTargetA;
+            document.getElementById('quiz-num-b-mask').innerText = '?';
+            document.getElementById('quiz-num-b-mask').className = 'w-12 h-12 bg-amber-800 border-2 border-dashed border-amber-400 rounded-xl flex items-center justify-center text-amber-300 animate-pulse';
+
+            const quizFrame = document.getElementById('quiz-ten-frame');
+            quizFrame.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'w-full aspect-square bg-white rounded-xl border border-dashed border-amber-300 flex items-center justify-center p-1';
+                if (i < quizTargetA) {
+                    slot.innerHTML = OTEMANJOU_A_SVG;
+                    slot.classList.add('bg-rose-50', 'border-rose-300');
+                } else {
+                    slot.innerHTML = `<span class="text-xs font-bold text-amber-300">${i+1}</span>`;
+                }
+                quizFrame.appendChild(slot);
+            }
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            for (let i = 1; i <= 9; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'w-11 h-11 sm:w-13 sm:h-13 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-black text-xl shadow-xs transition-all active:scale-95 flex items-center justify-center';
+                btn.innerText = i;
+                btn.onclick = () => checkQuizAnswer(i, btn);
+                optionsContainer.appendChild(btn);
+            }
+
+            speakText(`${numberSpeechMap[quizTargetA]} と あといくつで おおてまんじゅう？`);
+        }
+
+        function checkQuizAnswer(selectedNum, btnElement) {
+            if (selectedNum === quizTargetB) {
+                playSuccessFanfare();
+                document.getElementById('quiz-num-b-mask').innerText = quizTargetB;
+                document.getElementById('quiz-num-b-mask').className = 'w-12 h-12 bg-indigo-500 border border-indigo-600 rounded-xl flex items-center justify-center text-white font-black animate-pop';
+
+                const quizFrame = document.getElementById('quiz-ten-frame');
+                const slots = quizFrame.children;
+                for (let i = quizTargetA; i < 10; i++) {
+                    slots[i].innerHTML = OTEMANJOU_B_SVG;
+                    slots[i].classList.add('bg-indigo-50', 'border-indigo-300');
+                }
+
+                speakText(`せいかい！ ${numberSpeechMap[quizTargetA]} と ${numberSpeechMap[quizTargetB]} で おおてまんじゅう！`);
+
+                setTimeout(() => {
+                    startQuizQuestion();
+                }, 2800);
+            } else {
+                playPopSound("C4");
+                btnElement.classList.add('bg-rose-200', 'border-rose-400');
+                speakText("ちがうよ、もういちど！");
+            }
+        }
+
+        window.onload = function() {
+            initTenFrameContainer();
+            renderCard();
+        };
+    </script>
+</body>
+</html>
